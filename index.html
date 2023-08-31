@@ -2,12 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
+    <title>Pea Demo</title>
+    <script type="module" src="/src/index.ts" defer></script>
+
+    <style>
+      #app {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+    </style>
   </head>
   <body>
+    <script type="module">
+      import Pea from "./src/index.ts";
+
+      const pea = new Pea("#app");
+    </script>
+
     <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

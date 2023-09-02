@@ -47,6 +47,13 @@ class Pea {
     this.ctx = this.root.getContext("2d") as CanvasRenderingContext2D;
     this.container.appendChild(this.root);
 
+    new ResizeObserver((e) => {
+      const { width, height } = e[0].contentRect;
+
+      this.root.width = width;
+      this.root.height = height;
+    }).observe(this.root);
+
     this.emitter = new EventEmitter();
 
     const DEFAULTS: PeaOptions = {

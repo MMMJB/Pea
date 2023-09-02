@@ -1,7 +1,10 @@
 import type Pea from "./Pea";
 
 abstract class Module<T extends {} = {}> {
-  static DEFAULTS = {};
+  prototype = this;
+
+  abstract render(ref: unknown): void;
+  abstract CONFIG: Record<string, any>;
 
   constructor(
     protected pea: Pea,

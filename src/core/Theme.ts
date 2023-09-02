@@ -11,8 +11,8 @@ class Theme {
     docStyles: {},
   };
 
-  pea: Pea;
   options: ThemeOptions;
+  pea: Pea;
 
   constructor(pea: Pea, options: ThemeOptions) {
     this.pea = pea;

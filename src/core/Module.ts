@@ -3,7 +3,7 @@ import type Pea from "./Pea";
 abstract class Module<T extends {} = {}> {
   prototype = this;
 
-  abstract render(ref: unknown): void;
+  render?(ctx: CanvasRenderingContext2D): void;
   abstract CONFIG: Record<string, any>;
 
   constructor(

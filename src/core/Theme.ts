@@ -1,4 +1,4 @@
-import type Pea from "./Pea";
+import Pea from "./Pea";
 
 interface ThemeOptions {
   modules: Record<string, unknown>;
@@ -20,8 +20,7 @@ class Theme {
   }
 
   init(): void {
-    for (const style in this.options.docStyles)
-      this.pea.root.style.setProperty(style, this.options.docStyles[style]);
+    Pea.applyStyles(this.pea.root, this.options.docStyles);
   }
 }
 

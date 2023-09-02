@@ -35,6 +35,16 @@ class Pea {
     } else if (name && module) Pea.MODULES[name] = module;
   }
 
+  static applyStyles(
+    el: HTMLElement,
+    styles: Partial<CSSStyleDeclaration>
+  ): void {
+    for (const style in styles) {
+      const p = style.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+      el.style.setProperty(p, styles[style] as string);
+    }
+  }
+
   constructor(container: HTMLElement | string, options: Partial<PeaOptions>) {
     if (typeof container === "string")
       this.container = document.querySelector(container) as HTMLElement;

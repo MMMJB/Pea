@@ -1,7 +1,6 @@
+import Pea from "../core/Pea";
 import Module from "../core/Module";
 import { Position } from "../core/Document";
-
-import type Pea from "../core/Pea";
 
 class Cursor extends Module {
   CONFIG = {
@@ -19,7 +18,7 @@ class Cursor extends Module {
     this.pos = this.pea.document.selection.end;
   }
 
-  render(ctx: CanvasRenderingContext2D) {
+  render(ctx: CanvasRenderingContext2D): void {
     const h = this.CONFIG.lineHeight * this.CONFIG.fontSize,
       x = this.pos.rx(),
       y = this.pos.ry();

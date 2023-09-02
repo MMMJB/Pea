@@ -1,10 +1,11 @@
 import Module from "../core/Module";
+import { Position } from "../core/Document";
 
 import type Pea from "../core/Pea";
-import type { Position } from "../core/Renderer";
 
 class Cursor extends Module {
   CONFIG = {
+    auto: true,
     // TEMPORARY
     lineHeight: 1.5,
     fontSize: 12,
@@ -15,22 +16,18 @@ class Cursor extends Module {
   constructor(pea: Pea) {
     super(pea);
 
-    this.pos = { x: 0, y: 0 };
+    this.pos = this.pea.document.selection.end;
   }
 
-  x = (): number => this.pos.x + this.pea.options["margin"] * 96;
-  y = (): number => this.pos.y + this.pea.options["margin"] * 96;
-
-  render(ref: Cursor) {
-    const ctx = ref.pea.ctx,
-      x = ref.x(),
-      y = ref.y(),
-      h = ref.CONFIG.fontSize * ref.CONFIG.lineHeight;
+  render(ctx: CanvasRenderingContext2D) {
+    const h = this.CONFIG.lineHeight * this.CONFIG.fontSize,
+      x = this.pos.rx(),
+      y = this.pos.ry();
 
     ctx.clearRect(x, y, 1, h);
 
     ctx.moveTo(x, y);
-    ctx.lineTo(x, y + h);
+    ctx.lineTo(y, y + h);
     ctx.stroke();
   }
 }

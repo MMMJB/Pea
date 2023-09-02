@@ -1,15 +1,14 @@
 // @ts-expect-error
 import EventEmitter from "events";
-import Renderer from "./Renderer";
 import DefaultTheme from "../themes/DefaultTheme";
+import Document from "./Document";
 
-import type RendererT from "./Renderer";
 import type Theme from "./Theme";
 import type Module from "./Module";
 
 interface PeaOptions {
   theme: Theme;
-  modules: Record<string, Module | Function>;
+  modules: string[];
   readOnly?: boolean;
   placeholder?: string;
   margin: number;
@@ -22,9 +21,9 @@ class Pea {
   root: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   options: PeaOptions;
-  modules: Record<string, Module | Function>;
-  renderer: RendererT;
   emitter: EventEmitter;
+  document: Document;
+  modules: Record<string, Module> = {};
 
   static register(
     name?: string,
@@ -55,25 +54,44 @@ class Pea {
     }).observe(this.root);
 
     this.emitter = new EventEmitter();
+    this.document = new Document(this);
 
     const DEFAULTS: PeaOptions = {
       theme: new DefaultTheme(this),
       readOnly: false,
       placeholder: "",
-      modules: Pea.MODULES,
+      modules: Object.keys(Pea.MODULES),
       margin: 1,
     };
 
     this.options = { ...DEFAULTS, ...options };
-    this.modules = { ...Pea.MODULES, ...this.options.modules };
 
-    for (const name in this.modules)
-      this.modules[name] = new this.modules[name].prototype.constructor(this);
-
-    this.renderer = new Renderer(this);
-    this.renderer.start();
+    this.options.modules.forEach((m) => {
+      if (Object.keys(Pea.MODULES).includes(m))
+        this.modules[m] = new Pea.MODULES[m].prototype.constructor(this);
+      else
+        console.warn(
+          `Could not find module "${m}". Make sure that you've registered it before Pea initialization.`
+        );
+    });
 
     this.options.theme.init();
+    this.render(this.modules);
+  }
+
+  render(modules: Record<string, Module>) {
+    // OPTIMIZE IN FUTURE
+    for (const module in modules) {
+      const m = modules[module];
+
+      if (
+        ("CONFIG" in m.prototype && m.CONFIG.auto) ||
+        !("CONFIG" in m.prototype)
+      )
+        m.render(this.ctx);
+    }
+
+    window.requestAnimationFrame(() => this.render(modules));
   }
 }
 

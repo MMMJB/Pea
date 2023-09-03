@@ -6,10 +6,4 @@ const defaultTheme: Partial<CSSStyleDeclaration> = {
   boxShadow: "0px 1px 4px rgba(0, 0, 0, 0.16)",
 };
 
-const ruler: Partial<CSSStyleDeclaration> = {
-  position: "absolute",
-  color: "transparent",
-  pointerEvents: "none",
-};
-
-export { defaultTheme, ruler };
+export { defaultTheme };

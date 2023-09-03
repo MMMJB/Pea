@@ -19,11 +19,11 @@ class Pea {
 
   container: HTMLElement;
   root: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
   options: PeaOptions;
   emitter: EventEmitter;
   document: Document;
   modules: Record<string, Module> = {};
+  ctx: CanvasRenderingContext2D;
 
   static register(
     name?: string,
@@ -86,22 +86,24 @@ class Pea {
     });
 
     this.options.theme.init();
-    this.render(this.modules);
+    this.render(this.modules, 0);
   }
 
-  render(modules: Record<string, Module>) {
+  render(modules: Record<string, Module>, f: number) {
     // OPTIMIZE IN FUTURE
     for (const module in modules) {
       const m = modules[module];
 
       if (
-        ("CONFIG" in m.prototype && m.CONFIG.auto) ||
-        !("CONFIG" in m.prototype)
+        (("CONFIG" in m.prototype && m.CONFIG?.auto) ||
+          !("CONFIG" in m.prototype)) &&
+        "render" in m.prototype
       )
-        m.render(this.ctx);
+        // @ts-expect-error
+        m.render(this.ctx, f);
     }
 
-    window.requestAnimationFrame(() => this.render(modules));
+    window.requestAnimationFrame(() => this.render(modules, f + 1));
   }
 }
 

@@ -11,18 +11,67 @@ interface SnippetCollection {
   length: number;
 }
 
+interface RenderObj {
+  px: number;
+  py: number;
+  rx: number;
+  ry: number;
+}
+
 class Position {
-  // Returns either index of position in snippet collection or render location
+  pea: Pea;
+  last: RenderObj;
+
   constructor(
-    protected pea: Pea,
-    protected px: number,
+    pea: Pea,
+    protected px: number, // Current (index) position
     protected py: number
-  ) {}
+  ) {
+    this.pea = pea;
+
+    this.last = {
+      px: this.px,
+      py: this.py,
+      rx: this.computeRenderOffsetX(false),
+      ry: this.computeRenderOffsetY(false),
+    };
+  }
+
+  private computeRenderOffsetX(update: boolean = true): number {
+    const offs = this.px;
+
+    if (update) {
+      this.last.rx = offs;
+      this.last.px = this.px;
+    }
+
+    return offs + this.pea.options.page.margin * 96;
+  }
+
+  private computeRenderOffsetY(update: boolean = true): number {
+    const offs =
+      this.pea.options.page.lineHeight * this.pea.getFontSize() * this.py;
+
+    if (update) {
+      this.last.ry = offs;
+      this.last.py = this.py;
+    }
+
+    return offs + this.pea.options.page.margin * 96;
+  }
 
   x = (): number => this.px;
   y = (): number => this.py;
-  rx = (): number => this.px + this.pea.options["margin"] * 96;
-  ry = (): number => this.py + this.pea.options["margin"] * 96;
+  // TODO: Sum up all previous char widths, but only if position has changed (interface)
+  rx = (): number => {
+    if (this.px === this.last.px) return this.last.rx;
+    return this.computeRenderOffsetX();
+  };
+
+  ry = (): number => {
+    if (this.py === this.last.py) return this.last.ry;
+    return this.computeRenderOffsetY();
+  };
 
   set(
     nX?: number | ((x: number) => number),
@@ -35,6 +84,13 @@ class Position {
     else if (typeof nY === "function") this.py = nY(this.py);
 
     this.pea.emitter.emit("selection-change");
+  }
+
+  setX = (nX: number): void => this.set(nX);
+  setY = (nY: number): void => this.set(undefined, nY);
+
+  static set(position: Position): Position {
+    return new Position(position.pea, position.x(), position.y());
   }
 
   copy(p: Position, suppress?: boolean): void {
@@ -62,12 +118,8 @@ class Document {
     this.selection = new Selection(this.pea, 0, 0);
 
     // * TEMPORARY
-    this.pea.ctx.font = "12px sans-serif";
     this.curSet = this.measureSet();
-    this.pea.ctx.font = "24px sans-serif";
-    this.curSet = this.measureSet();
-
-    console.log(this.fontSets);
+    console.log(this.curSet);
   }
 
   measureSet(): Record<string, TextMetrics> {
@@ -105,7 +157,7 @@ class Document {
     snippet.text += char;
     line.length++;
 
-    this.selection.start.set((n) => n + 16);
+    this.selection.start.set((n) => n + 1);
     this.selection.end.copy(this.selection.start, true);
   }
 

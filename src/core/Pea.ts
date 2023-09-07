@@ -11,7 +11,10 @@ interface PeaOptions {
   modules: string[];
   readOnly?: boolean;
   placeholder?: string;
-  margin: number;
+  page: {
+    lineHeight: number;
+    margin: number;
+  };
 }
 
 class Pea {
@@ -64,17 +67,21 @@ class Pea {
     }).observe(this.root);
 
     this.emitter = new EventEmitter();
-    this.document = new Document(this);
 
     const DEFAULTS: PeaOptions = {
       theme: new DefaultTheme(this),
       readOnly: false,
       placeholder: "",
       modules: Object.keys(Pea.MODULES),
-      margin: 1,
+      page: {
+        lineHeight: 1.5,
+        margin: 1,
+      },
     };
 
     this.options = { ...DEFAULTS, ...options };
+
+    this.document = new Document(this);
 
     this.options.modules.forEach((m) => {
       if (Object.keys(Pea.MODULES).includes(m))
@@ -105,6 +112,8 @@ class Pea {
 
     window.requestAnimationFrame(() => this.render(modules, f + 1));
   }
+
+  getFontSize = (): number => parseInt(this.ctx.font.split(" ")[0]);
 }
 
 export { Pea as default };

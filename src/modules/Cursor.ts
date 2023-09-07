@@ -7,9 +7,6 @@ class Cursor extends Module {
     auto: true,
     blinkLength: 30,
     blinkFrequency: 2,
-    // * TEMPORARY
-    lineHeight: 1.5,
-    fontSize: 12,
   };
 
   pos: Position;
@@ -26,7 +23,7 @@ class Cursor extends Module {
   }
 
   render(ctx: CanvasRenderingContext2D, frame: number): void {
-    const h = this.CONFIG.lineHeight * this.CONFIG.fontSize,
+    const h = this.pea.options.page.lineHeight * this.pea.getFontSize(),
       x = this.pos.rx(),
       y = this.pos.ry();
 

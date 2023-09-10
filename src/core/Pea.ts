@@ -96,6 +96,10 @@ class Pea {
     this.render(this.modules, 0);
   }
 
+  focus = (): void => this.document.focus();
+  blur = (): void => this.document.blur();
+  hasFocus = (): boolean => this.document.focused;
+
   render(modules: Record<string, Module>, f: number) {
     const start = Date.now();
     // ! OPTIMIZE IN FUTURE

@@ -6,6 +6,8 @@ class Keyboard extends Module {
     super(pea);
 
     window.addEventListener("keydown", (e) => {
+      if (!this.pea.hasFocus()) return;
+
       const key = e.key;
 
       if (key.length === 1) {

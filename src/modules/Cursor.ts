@@ -47,10 +47,11 @@ class Cursor extends Module {
     ctx.clearRect(0, y - 0.5, x + 1, h * 1.85);
 
     if (
-      Math.floor(frame / this.CONFIG.blinkLength) %
+      this.pea.hasFocus() &&
+      (Math.floor(frame / this.CONFIG.blinkLength) %
         this.CONFIG.blinkFrequency ===
         0 ||
-      Date.now() - this.lastTextChange < 500
+        Date.now() - this.lastTextChange < 500)
     ) {
       ctx.beginPath();
       ctx.moveTo(x, y);

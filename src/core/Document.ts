@@ -109,6 +109,7 @@ class Document {
   };
 
   pea: Pea;
+  focused: boolean;
   content: SnippetCollection[] = [];
   selection: Selection;
   fontSets: Record<string, Record<string, TextMetrics>> = {};
@@ -116,13 +117,26 @@ class Document {
 
   constructor(pea: Pea) {
     this.pea = pea;
+    this.focused = false;
     this.content.push({ snippets: [{ text: "" }], length: 0 });
     this.selection = new Selection(this.pea, 0, 0);
 
     // * TEMPORARY
     this.pea.ctx.font = Document.DEFAULTS.font;
     this.curSet = this.measureSet();
+
+    window.addEventListener("click", (e) => {
+      if (e.target === this.pea.root) this.focus();
+      else this.blur();
+    });
   }
+
+  focus = (): void => {
+    this.focused = true;
+  };
+  blur = (): void => {
+    this.focused = false;
+  };
 
   renderLine(line: number): void {
     const ctx = this.pea.ctx,
@@ -262,8 +276,6 @@ class Document {
 
     for (let i = si + 1; i < ei; i++)
       t += w(l.snippets[i].text, l.snippets[i].formats?.font as string);
-
-    console.log(t);
 
     return t;
   }

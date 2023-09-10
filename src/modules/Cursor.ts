@@ -36,16 +36,15 @@ class Cursor extends Module {
   }
 
   render(ctx: CanvasRenderingContext2D, frame: number): void {
-    const fs =
-      this.pea.getFontSize(this.focusedSnippet.formats?.font as string) ||
-      this.pea.getFontSize(Document.DEFAULTS.font);
+    const fs = parseInt(
+      (this.focusedSnippet.formats?.font as string) || Document.DEFAULTS.font
+    );
 
     const h = this.pea.options.page.lineHeight * fs,
       x = this.pos.rx(),
       y = this.pos.ry() - h * 0.85;
 
-    ctx.clearRect(0, y - 0.5, x + 0.5, h * 1.85);
-    this.pea.document.renderLine(this.pos.y());
+    ctx.clearRect(0, y - 0.5, x + 1, h * 1.85);
 
     if (
       Math.floor(frame / this.CONFIG.blinkLength) %

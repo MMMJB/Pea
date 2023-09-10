@@ -97,6 +97,7 @@ class Pea {
   }
 
   render(modules: Record<string, Module>, f: number) {
+    const start = Date.now();
     // ! OPTIMIZE IN FUTURE
     for (const module in modules) {
       const m = modules[module];
@@ -110,11 +111,15 @@ class Pea {
         m.render(this.ctx, f);
     }
 
+    this.document.renderLine(this.document.selection.end.y());
+
+    this.ctx.clearRect(0, 0, 1000, parseInt(this.ctx.font));
+    this.ctx.fillText(Date.now() - start + "ms", 0, parseInt(this.ctx.font));
+
     window.requestAnimationFrame(() => this.render(modules, f + 1));
   }
 
-  getFontSize = (f?: string): number =>
-    parseInt(f || this.ctx.font.split(" ")[0]);
+  getFontSize = (f?: string): number => parseInt(f || this.ctx.font);
 }
 
 export { Pea as default };

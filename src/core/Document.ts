@@ -86,9 +86,6 @@ class Position {
     if (typeof nY === "number") this.py = nY;
     else if (typeof nY === "function") this.py = nY(this.py);
 
-    if (this.px !== this.last.px) this.computeRenderOffsetX(false);
-    if (this.py !== this.last.py) this.computeRenderOffsetY(false);
-
     this.pea.emitter.emit("selection-change");
   }
 
@@ -170,10 +167,12 @@ class Document {
     Document.WHITELIST.split("").forEach((c) => {
       if (c !== " ") this.fontSets[font][c] = this.pea.ctx.measureText(c);
       else {
-        // ! Fix in future
+        const c = Object.keys(this.fontSets[font])[0];
         // @ts-expect-error
-        this.fontSets[font][c] = {
-          actualBoundingBoxRight: this.pea.getFontSize() / 4,
+        this.fontSets[font][" "] = {
+          actualBoundingBoxRight:
+            this.pea.ctx.measureText(`${c} ${c}`).width -
+            this.fontSets[font][c].width * 2,
         };
       }
     });
@@ -248,10 +247,12 @@ class Document {
       .reduce((a, c) => a + c.text.length, 0);
 
     const w = (t: string, f: string): number => {
-      const s = this.fontSets[f || Document.DEFAULTS.font];
-      const m = this.pea.ctx.measureText(t);
+      const w = t.length - t.trim().length;
+      this.pea.ctx.font = f || Document.DEFAULTS.font;
+      const { actualBoundingBoxLeft: l, actualBoundingBoxRight: r } =
+        this.pea.ctx.measureText(t);
 
-      return m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+      return l + r + w * this.curSet[" "].actualBoundingBoxRight;
     };
 
     let t = 0;
@@ -261,6 +262,8 @@ class Document {
 
     for (let i = si + 1; i < ei; i++)
       t += w(l.snippets[i].text, l.snippets[i].formats?.font as string);
+
+    console.log(t);
 
     return t;
   }

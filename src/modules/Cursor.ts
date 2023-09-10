@@ -28,6 +28,7 @@ class Cursor extends Module {
       y = this.pos.ry();
 
     ctx.clearRect(0, y, x + 0.5, h);
+    this.pea.document.renderLine(this.pos.y());
 
     if (
       Math.floor(frame / this.CONFIG.blinkLength) %

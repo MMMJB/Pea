@@ -70,6 +70,7 @@ class Position {
 
   x = (): number => this.px;
   y = (): number => this.py;
+  // ! Horribly inefficient. In the future, just add to render position on text-change
   rx = (): number =>
     this.px === this.last.px ? this.last.rx : this.computeRenderOffsetX();
   ry = (): number =>
@@ -84,6 +85,9 @@ class Position {
 
     if (typeof nY === "number") this.py = nY;
     else if (typeof nY === "function") this.py = nY(this.py);
+
+    if (this.px !== this.last.px) this.computeRenderOffsetX(false);
+    if (this.py !== this.last.py) this.computeRenderOffsetY(false);
 
     this.pea.emitter.emit("selection-change");
   }
@@ -103,6 +107,10 @@ class Document {
   static WHITELIST =
     String.fromCharCode(...Array.from(Array(94), (_, i) => i + 33)) + " ";
 
+  static DEFAULTS = {
+    font: "10px sans-serif",
+  };
+
   pea: Pea;
   content: SnippetCollection[] = [];
   selection: Selection;
@@ -117,6 +125,30 @@ class Document {
     // * TEMPORARY
     this.curSet = this.measureSet();
     console.log(this.curSet);
+  }
+
+  renderLine(line: number): void {
+    const ctx = this.pea.ctx,
+      l = this.content[line].snippets,
+      m = this.pea.options.page.margin * 96,
+      lh = this.pea.options.page.lineHeight * this.pea.getFontSize(),
+      y = line * lh + m + lh / 2;
+
+    let offs = m;
+
+    for (let s = 0; s < l.length; s++) {
+      for (let t = 0; t < l[s].text.length; t++) {
+        const f = (l[s].formats?.font as string) || Document.DEFAULTS.font,
+          c = l[s].text[t];
+
+        ctx.font = f;
+        // TODO: Set correct text color
+        ctx.fillStyle = "red";
+        ctx.fillText(c, offs, y);
+
+        offs += this.fontSets[f][c].actualBoundingBoxRight;
+      }
+    }
   }
 
   measureSet(): Record<string, TextMetrics> {
@@ -136,9 +168,16 @@ class Document {
     // }
     else this.fontSets[font] = {};
 
-    Document.WHITELIST.split("").forEach(
-      (c) => (this.fontSets[font][c] = this.pea.ctx.measureText(c))
-    );
+    Document.WHITELIST.split("").forEach((c) => {
+      if (c !== " ") this.fontSets[font][c] = this.pea.ctx.measureText(c);
+      else {
+        // ! Fix in future
+        // @ts-expect-error
+        this.fontSets[font][c] = {
+          actualBoundingBoxRight: this.pea.getFontSize() / 4,
+        };
+      }
+    });
 
     return this.fontSets[font];
   }
@@ -210,7 +249,7 @@ class Document {
       .reduce((a, c) => a + c.text.length, 0);
 
     const w = (t: string, f: string): number => {
-      const s = this.fontSets[f || "10px sans-serif"];
+      const s = this.fontSets[f || Document.DEFAULTS.font];
 
       return t.split("").reduce((a, c) => a + s[c].actualBoundingBoxRight, 0); // + [c].actualBoundingBoxLeft
     };

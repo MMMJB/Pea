@@ -1,6 +1,9 @@
 import Pea from "../core/Pea";
 import Module from "../core/Module";
+import Document from "../core/Document";
 import { Position } from "../core/Document";
+
+import type { Snippet } from "../core/Document";
 
 class Cursor extends Module {
   CONFIG = {
@@ -10,24 +13,38 @@ class Cursor extends Module {
   };
 
   pos: Position;
+  focusedSnippet: Snippet = { text: "" };
   lastTextChange: number = Date.now();
 
   constructor(pea: Pea) {
     super(pea);
 
     this.pos = this.pea.document.selection.end;
-    this.pea.emitter.on(
-      "selection-change",
-      () => (this.lastTextChange = Date.now())
+    this.updateFocusedSnippet();
+
+    this.pea.emitter.on("selection-change", () => {
+      this.lastTextChange = Date.now();
+      this.updateFocusedSnippet();
+    });
+  }
+
+  private updateFocusedSnippet(): void {
+    [this.focusedSnippet] = this.pea.document.snippetAt(
+      this.pos.x(),
+      this.pos.y()
     );
   }
 
   render(ctx: CanvasRenderingContext2D, frame: number): void {
-    const h = this.pea.options.page.lineHeight * this.pea.getFontSize(),
-      x = this.pos.rx(),
-      y = this.pos.ry();
+    const fs =
+      this.pea.getFontSize(this.focusedSnippet.formats?.font as string) ||
+      this.pea.getFontSize(Document.DEFAULTS.font);
 
-    ctx.clearRect(0, y, x + 0.5, h);
+    const h = this.pea.options.page.lineHeight * fs,
+      x = this.pos.rx(),
+      y = this.pos.ry() - h * 0.85;
+
+    ctx.clearRect(0, y - 0.5, x + 0.5, h * 1.85);
     this.pea.document.renderLine(this.pos.y());
 
     if (

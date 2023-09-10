@@ -55,15 +55,15 @@ class Pea {
 
     this.root = document.createElement("canvas");
     this.root.setAttribute("class", "pea--root");
-    this.root.style.setProperty("cursor", "text");
     this.ctx = this.root.getContext("2d") as CanvasRenderingContext2D;
     this.container.appendChild(this.root);
 
     new ResizeObserver((e) => {
-      const { width, height } = e[0].contentRect;
+      const { width: w, height: h } = e[0].contentRect;
+      const dpr = window.devicePixelRatio || 1;
 
-      this.root.width = width;
-      this.root.height = height;
+      this.root.width = w * dpr;
+      this.root.height = h * dpr;
     }).observe(this.root);
 
     this.emitter = new EventEmitter();
@@ -74,7 +74,7 @@ class Pea {
       placeholder: "",
       modules: Object.keys(Pea.MODULES),
       page: {
-        lineHeight: 1.5,
+        lineHeight: 1,
         margin: 1,
       },
     };
@@ -88,7 +88,7 @@ class Pea {
         this.modules[m] = new Pea.MODULES[m].prototype.constructor(this);
       else
         console.warn(
-          `Could not find module "${m}". Make sure that you've registered it before Pea initialization.`
+          `Could not find module "${m}". Make sure you've registered it before initializing Pea.`
         );
     });
 
@@ -97,7 +97,7 @@ class Pea {
   }
 
   render(modules: Record<string, Module>, f: number) {
-    // OPTIMIZE IN FUTURE
+    // ! OPTIMIZE IN FUTURE
     for (const module in modules) {
       const m = modules[module];
 
@@ -113,7 +113,8 @@ class Pea {
     window.requestAnimationFrame(() => this.render(modules, f + 1));
   }
 
-  getFontSize = (): number => parseInt(this.ctx.font.split(" ")[0]);
+  getFontSize = (f?: string): number =>
+    parseInt(f || this.ctx.font.split(" ")[0]);
 }
 
 export { Pea as default };

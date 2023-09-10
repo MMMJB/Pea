@@ -108,7 +108,7 @@ class Document {
     String.fromCharCode(...Array.from(Array(94), (_, i) => i + 33)) + " ";
 
   static DEFAULTS = {
-    font: "10px sans-serif",
+    font: "18px sans-serif",
   };
 
   pea: Pea;
@@ -119,12 +119,12 @@ class Document {
 
   constructor(pea: Pea) {
     this.pea = pea;
-    this.content.push({ snippets: [], length: 0 });
+    this.content.push({ snippets: [{ text: "" }], length: 0 });
     this.selection = new Selection(this.pea, 0, 0);
 
     // * TEMPORARY
+    this.pea.ctx.font = Document.DEFAULTS.font;
     this.curSet = this.measureSet();
-    console.log(this.curSet);
   }
 
   renderLine(line: number): void {
@@ -132,22 +132,21 @@ class Document {
       l = this.content[line].snippets,
       m = this.pea.options.page.margin * 96,
       lh = this.pea.options.page.lineHeight * this.pea.getFontSize(),
-      y = line * lh + m + lh / 2;
+      y = line * lh + m;
 
     let offs = m;
 
     for (let s = 0; s < l.length; s++) {
-      for (let t = 0; t < l[s].text.length; t++) {
-        const f = (l[s].formats?.font as string) || Document.DEFAULTS.font,
-          c = l[s].text[t];
+      const f = (l[s].formats?.font as string) || Document.DEFAULTS.font,
+        t = l[s].text;
 
-        ctx.font = f;
-        // TODO: Set correct text color
-        ctx.fillStyle = "red";
-        ctx.fillText(c, offs, y);
+      ctx.font = f;
+      // TODO: Set correct text color
+      ctx.fillText(t, offs, y);
 
-        offs += this.fontSets[f][c].actualBoundingBoxRight;
-      }
+      offs += t
+        .split("")
+        .reduce((a, c) => a + this.fontSets[f][c].actualBoundingBoxRight, 0);
     }
   }
 
@@ -250,8 +249,9 @@ class Document {
 
     const w = (t: string, f: string): number => {
       const s = this.fontSets[f || Document.DEFAULTS.font];
+      const m = this.pea.ctx.measureText(t);
 
-      return t.split("").reduce((a, c) => a + s[c].actualBoundingBoxRight, 0); // + [c].actualBoundingBoxLeft
+      return m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
     };
 
     let t = 0;
@@ -267,3 +267,4 @@ class Document {
 }
 
 export { Position, Document as default };
+export type { Snippet };

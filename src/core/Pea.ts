@@ -102,7 +102,9 @@ class Pea {
 
   render(modules: Record<string, Module>, f: number) {
     const start = Date.now();
+
     // ! OPTIMIZE IN FUTURE
+
     for (const module in modules) {
       const m = modules[module];
 
@@ -115,10 +117,18 @@ class Pea {
         m.render(this.ctx, f);
     }
 
-    this.document.renderLine(this.document.selection.end.y());
+    const s = this.document.selection,
+      c = this.ctx;
 
-    this.ctx.clearRect(0, 0, 1000, parseInt(this.ctx.font));
-    this.ctx.fillText(Date.now() - start + "ms", 0, parseInt(this.ctx.font));
+    c.save();
+    c.fillStyle = "#B4D5FE";
+    c.fillRect(s.rx(), s.ry(), s.rw(), s.height);
+    c.restore();
+
+    this.document.renderLine(s.end.y());
+
+    c.clearRect(0, 0, 1000, parseInt(c.font));
+    c.fillText(Date.now() - start + "ms", 0, parseInt(c.font));
 
     window.requestAnimationFrame(() => this.render(modules, f + 1));
   }

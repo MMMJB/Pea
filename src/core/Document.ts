@@ -109,15 +109,14 @@ class Document {
   };
 
   pea: Pea;
-  focused: boolean;
   content: SnippetCollection[] = [];
   selection: Selection;
   fontSets: Record<string, Record<string, TextMetrics>> = {};
   curSet: Record<string, TextMetrics>;
+  focused: boolean = true;
 
   constructor(pea: Pea) {
     this.pea = pea;
-    this.focused = false;
     this.content.push({ snippets: [{ text: "" }], length: 0 });
     this.selection = new Selection(this.pea, 0, 0);
 
@@ -206,13 +205,14 @@ class Document {
     snippet.text += char;
     line.length++;
 
-    this.selection.start.set((n) => n + 1);
-    this.selection.end.copy(this.selection.start, true);
+    this.selection.end.set((n) => n + 1);
+    this.selection.start.copy(this.selection.end, true);
 
     this.pea.emitter.emit("text-change");
   }
 
-  appendText(text: string): void {
+  appendText(text: string, selection?: Selection): void {
+    // TODO: selection || this.selection
     text.split("").forEach((c) => this.appendChar(c));
   }
 

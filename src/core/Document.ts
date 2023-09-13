@@ -159,15 +159,12 @@ class Document {
         t = l[s].text;
 
       ctx.font = f;
-
-      if (!(f in this.fontSets)) this.measureSet();
+      this.measureSet();
 
       // TODO: Set correct text color
       ctx.fillText(t, offs, y);
 
-      offs += t
-        .split("")
-        .reduce((a, c) => a + this.fontSets[f][c].actualBoundingBoxRight, 0);
+      offs += this.measureText(t, f);
     }
   }
 
@@ -181,7 +178,10 @@ class Document {
     //   (f) => f.split(" ")[1] === family
     // );
 
-    if (font in this.fontSets) return;
+    if (font in this.fontSets) {
+      this.curSet = this.fontSets[font];
+      return;
+    }
     // else if (existing.length > 0) {
     //   const scalar = parseInt(size) / parseInt(existing[0].split(" ")[0]);
     //   console.log({ ...this.fontSets[existing[0]] });
@@ -296,9 +296,12 @@ class Document {
   }
 
   measureText(text: string, font: string): number {
-    const w = text.length - text.trim().length;
+    const w = text.length - text.trim().length,
+      f = font || Document.DEFAULTS.font;
 
-    this.pea.ctx.font = font || Document.DEFAULTS.font;
+    this.pea.ctx.font = f;
+    this.measureSet();
+
     const { actualBoundingBoxLeft: l, actualBoundingBoxRight: r } =
       this.pea.ctx.measureText(text);
 

@@ -46,7 +46,15 @@ class Position {
 
     if (!this.pea.document) return offs;
 
-    offs += this.pea.document.measureText(this.py, 0, this.px);
+    if (this.px - this.last.px) {
+      const s = this.pea.document.content.at(-1)?.snippets.at(-1);
+      const t = s?.text.at(-1);
+      const f = (s?.formats?.font as string) || Document.DEFAULTS.font;
+
+      if (!t) return offs;
+
+      offs = this.last.rx + this.pea.document.measureText(t, f);
+    } else offs += this.pea.document.measureLine(this.py, 0, this.px);
 
     if (update) {
       this.last.rx = offs;
@@ -252,7 +260,7 @@ class Document {
     return [snippet, i];
   }
 
-  measureText(line: number, start?: number, end?: number): number {
+  measureLine(line: number, start?: number, end?: number): number {
     const l = this.content[line],
       s = start || 0,
       e = end || l.length - 1;
@@ -267,24 +275,34 @@ class Document {
       .slice(0, e + 1)
       .reduce((a, c) => a + c.text.length, 0);
 
-    const w = (t: string, f: string): number => {
-      const w = t.length - t.trim().length;
-      this.pea.ctx.font = f || Document.DEFAULTS.font;
-      const { actualBoundingBoxLeft: l, actualBoundingBoxRight: r } =
-        this.pea.ctx.measureText(t);
-
-      return l + r + w * this.curSet[" "].actualBoundingBoxRight;
-    };
-
     let t = 0;
 
-    t += w(ss.text.substring(sl - s), ss.formats?.font as string);
-    t += w(es.text.substring(el - e), es.formats?.font as string);
+    t += this.measureText(
+      ss.text.substring(sl - s),
+      ss.formats?.font as string
+    );
+    t += this.measureText(
+      es.text.substring(el - e),
+      es.formats?.font as string
+    );
 
     for (let i = si + 1; i < ei; i++)
-      t += w(l.snippets[i].text, l.snippets[i].formats?.font as string);
+      t += this.measureText(
+        l.snippets[i].text,
+        l.snippets[i].formats?.font as string
+      );
 
     return t;
+  }
+
+  measureText(text: string, font: string): number {
+    const w = text.length - text.trim().length;
+
+    this.pea.ctx.font = font || Document.DEFAULTS.font;
+    const { actualBoundingBoxLeft: l, actualBoundingBoxRight: r } =
+      this.pea.ctx.measureText(text);
+
+    return l + r + w * this.curSet[" "].actualBoundingBoxRight;
   }
 }
 

@@ -1,11 +1,13 @@
 import { Position } from "./Document";
 
 import type Pea from "./Pea";
+import type { Snippet } from "./Document";
 
 class Selection {
   pea: Pea;
   start: Position;
   end: Position;
+  focusedSnippet: Snippet = { text: "" };
   height: number = 0;
 
   // TODO: Make compatible with multiline selections
@@ -17,7 +19,16 @@ class Selection {
 
     this.pea.emitter.on("selection-change", () => {
       this.height = this.calculateHeight();
+      this.updateFocusedSnippet();
     });
+  }
+
+  updateFocusedSnippet(): void {
+    // TODO: Make compatible with multiple snippets at once
+    [this.focusedSnippet] = this.pea.document.snippetAt(
+      this.end.x(),
+      this.end.y()
+    );
   }
 
   rx = (): number => this.start.rx();

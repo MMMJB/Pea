@@ -3,8 +3,6 @@ import Module from "../core/Module";
 import Document from "../core/Document";
 import { Position } from "../core/Document";
 
-import type { Snippet } from "../core/Document";
-
 class Cursor extends Module {
   CONFIG = {
     auto: true,
@@ -13,31 +11,22 @@ class Cursor extends Module {
   };
 
   pos: Position;
-  focusedSnippet: Snippet = { text: "" };
   lastTextChange: number = Date.now();
 
   constructor(pea: Pea) {
     super(pea);
 
     this.pos = this.pea.document.selection.end;
-    this.updateFocusedSnippet();
 
     this.pea.emitter.on("selection-change", () => {
       this.lastTextChange = Date.now();
-      this.updateFocusedSnippet();
     });
-  }
-
-  private updateFocusedSnippet(): void {
-    [this.focusedSnippet] = this.pea.document.snippetAt(
-      this.pos.x(),
-      this.pos.y()
-    );
   }
 
   render(ctx: CanvasRenderingContext2D, frame: number): void {
     const fs = parseInt(
-      (this.focusedSnippet.formats?.font as string) || Document.DEFAULTS.font
+      (this.pea.document.selection.focusedSnippet.formats?.font as string) ||
+        Document.DEFAULTS.font
     );
 
     const h = this.pea.options.page.lineHeight * fs,

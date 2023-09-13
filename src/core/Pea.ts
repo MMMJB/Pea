@@ -126,7 +126,7 @@ class Pea {
 
     c.save();
     c.fillStyle = "#B4D5FE";
-    c.fillRect(s.rx(), s.ry(), s.rw(), s.height);
+    c.fillRect(x, y, s.rw(), h);
     c.restore();
 
     this.document.renderLine(s.end.y());

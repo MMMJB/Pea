@@ -112,7 +112,7 @@ class Document {
   content: SnippetCollection[] = [];
   selection: Selection;
   fontSets: Record<string, Record<string, TextMetrics>> = {};
-  curSet: Record<string, TextMetrics>;
+  curSet: Record<string, TextMetrics> = {};
   focused: boolean = true;
 
   constructor(pea: Pea) {
@@ -122,7 +122,7 @@ class Document {
 
     // * TEMPORARY
     this.pea.ctx.font = Document.DEFAULTS.font;
-    this.curSet = this.measureSet();
+    this.measureSet();
 
     window.addEventListener("click", (e) => {
       if (e.target === this.pea.root) this.focus();
@@ -151,6 +151,9 @@ class Document {
         t = l[s].text;
 
       ctx.font = f;
+
+      if (!(f in this.fontSets)) this.measureSet();
+
       // TODO: Set correct text color
       ctx.fillText(t, offs, y);
 
@@ -160,7 +163,7 @@ class Document {
     }
   }
 
-  measureSet(): Record<string, TextMetrics> {
+  measureSet(): void {
     // TODO: Fetch current snippet font
     const font = this.pea.ctx.font;
     // ? Optimize by scaling other calculated fonts; tradeoff worth it?
@@ -170,7 +173,7 @@ class Document {
     //   (f) => f.split(" ")[1] === family
     // );
 
-    if (font in this.fontSets) return this.fontSets[font];
+    if (font in this.fontSets) return;
     // else if (existing.length > 0) {
     //   const scalar = parseInt(size) / parseInt(existing[0].split(" ")[0]);
     //   console.log({ ...this.fontSets[existing[0]] });
@@ -190,7 +193,7 @@ class Document {
       }
     });
 
-    return this.fontSets[font];
+    this.curSet = this.fontSets[font];
   }
 
   appendChar(char: string): void {
@@ -202,7 +205,11 @@ class Document {
       line.snippets.at(-1) ||
       line.snippets[line.snippets.push({ text: "" }) - 1];
 
-    snippet.text += char;
+    // snippet.text += char;
+    line.snippets.push({
+      text: char,
+      formats: { font: Math.floor(Math.random() * 16) + 16 + "px sans-serif" },
+    });
     line.length++;
 
     this.selection.end.set((n) => n + 1);

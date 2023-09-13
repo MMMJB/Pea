@@ -32,12 +32,10 @@ class Selection {
   private calculateHeight(): number {
     const line = this.pea.document.content[this.start.y()].snippets;
 
-    return (
-      line.reduce(
-        (a, b) =>
-          a + parseInt((b.formats?.font as string) || this.pea.ctx.font),
-        0
-      ) / line.length
+    return Math.max(
+      ...Array.from(line, (s) =>
+        parseInt((s.formats?.font as string) || this.pea.ctx.font)
+      )
     );
   }
 }

@@ -11,7 +11,9 @@ class Keyboard extends Module {
       const key = e.key;
 
       if (key.length === 1) {
-        if (!e.ctrlKey) e.preventDefault();
+        if (e.ctrlKey) return;
+        
+        e.preventDefault();
         this.pea.document.appendChar(key);
       } else {
         switch (key) {

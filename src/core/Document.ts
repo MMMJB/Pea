@@ -213,11 +213,11 @@ class Document {
       line.snippets.at(-1) ||
       line.snippets[line.snippets.push({ text: "" }) - 1];
 
-    // snippet.text += char;
-    line.snippets.push({
-      text: char,
-      formats: { font: Math.floor(Math.random() * 16) + 16 + "px sans-serif" },
-    });
+    snippet.text += char;
+    // line.snippets.push({
+    //   text: char,
+    //   formats: { font: Math.floor(Math.random() * 16) + 16 + "px sans-serif" },
+    // });
     line.length++;
 
     this.selection.end.set((n) => n + 1);

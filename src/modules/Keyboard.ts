@@ -12,7 +12,7 @@ class Keyboard extends Module {
 
       if (key.length === 1) {
         if (e.ctrlKey) return;
-        
+
         e.preventDefault();
         this.pea.document.appendChar(key);
       } else {

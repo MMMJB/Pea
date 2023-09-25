@@ -15,7 +15,9 @@ class Selection {
     this.pea = pea;
 
     this.start = new Position(this.pea, x, y);
-    this.end = length ? this.calculateEnd(length) : Position.set(this.start);
+    this.end = length
+      ? this.calculateEnd(length)
+      : Position.setFrom(this.start);
 
     this.pea.emitter.on("selection-change", () => {
       this.height = this.calculateHeight();

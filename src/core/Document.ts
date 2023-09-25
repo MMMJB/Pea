@@ -37,24 +37,17 @@ class Position {
     };
   }
 
-  static set(position: Position): Position {
+  static setFrom(position: Position): Position {
     return new Position(position.pea, position.x(), position.y());
   }
 
   private computeRenderOffsetX(update: boolean = true): number {
+    // ! Runs twice for some reason
     let offs = this.pea.options.page.margin * 96;
 
     if (!this.pea.document) return offs;
 
-    if (this.px - this.last.px) {
-      const s = this.pea.document.content.at(-1)?.snippets.at(-1);
-      const t = s?.text.at(-1);
-      const f = (s?.formats?.font as string) || Document.DEFAULTS.font;
-
-      if (!t) return offs;
-
-      offs = this.last.rx + this.pea.document.measureText(t, f);
-    } else offs += this.pea.document.measureLine(this.py, 0, this.px);
+    offs += this.pea.document.measureLine(this.py, 0, this.px);
 
     if (update) {
       this.last.rx = offs;
@@ -213,11 +206,11 @@ class Document {
       line.snippets.at(-1) ||
       line.snippets[line.snippets.push({ text: "" }) - 1];
 
-    // snippet.text += char;
-    line.snippets.push({
-      text: char,
-      formats: { font: Math.floor(Math.random() * 16) + 16 + "px sans-serif" },
-    });
+    snippet.text += char;
+    // line.snippets.push({
+    //   text: char,
+    //   formats: { font: Math.floor(Math.random() * 16) + 16 + "px sans-serif" },
+    // });
     line.length++;
 
     this.selection.end.set((n) => n + 1);

@@ -23,6 +23,12 @@ class Keyboard extends Module {
           case "Enter":
             this.pea.document.newLine();
             break;
+          case "ArrowLeft":
+            this.pea.document.selection.collapseAndMoveTo((n) => n - 1);
+            break;
+          case "ArrowRight":
+            this.pea.document.selection.collapseAndMoveTo((n) => n + 1);
+            break;
           default:
             break;
         }

@@ -200,13 +200,20 @@ class Document {
   appendChar(char: string): void {
     // TODO: Automatically add new line on text overflow
     const line =
-      this.content.at(-1) ||
+      this.content[this.selection.end.y()] ||
       this.content[this.content.push({ snippets: [], length: 0 }) - 1];
     const snippet =
-      line.snippets.at(-1) ||
+      line.snippets[this.selection.focusedSnippetIndex] ||
       line.snippets[line.snippets.push({ text: "" }) - 1];
 
-    snippet.text += char;
+    const index =
+      this.selection.end.x() -
+      line.snippets
+        .slice(0, this.selection.focusedSnippetIndex)
+        .reduce((a, c) => a + c.text.length, 0);
+
+    snippet.text =
+      snippet.text.substring(0, index) + char + snippet.text.substring(index);
     // line.snippets.push({
     //   text: char,
     //   formats: { font: Math.floor(Math.random() * 16) + 16 + "px sans-serif" },
@@ -255,8 +262,8 @@ class Document {
 
   measureLine(line: number, start?: number, end?: number): number {
     const l = this.content[line],
-      s = start || 0,
-      e = end || l.length - 1;
+      s = start !== undefined ? start : 0,
+      e = end !== undefined ? end : l.length - 1;
 
     const [ss, si] = this.snippetAt(s, line);
     const [es, ei] = this.snippetAt(e, line);

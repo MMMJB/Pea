@@ -109,7 +109,7 @@ class Pea {
       y = s.end.ry() - h * 0.85,
       c = this.ctx;
 
-    c.clearRect(0, y - 0.5, x + 1, h * 1.85);
+    c.clearRect(0, y - 2, c.canvas.width, h + 2);
 
     // ! OPTIMIZE IN FUTURE
     for (const module in modules) {

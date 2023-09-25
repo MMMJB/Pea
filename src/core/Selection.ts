@@ -8,6 +8,7 @@ class Selection {
   start: Position;
   end: Position;
   focusedSnippet: Snippet = { text: "" };
+  focusedSnippetIndex: number = 0;
   height: number = 0;
 
   // TODO: Make compatible with multiline selections
@@ -25,12 +26,27 @@ class Selection {
     });
   }
 
+  collapseAndMoveTo(
+    x?: number | ((x: number) => number),
+    y?: number | ((y: number) => number)
+  ): void {
+    let nx = typeof x === "function" ? x(this.end.x()) : x || this.end.x(),
+      ny = typeof y === "function" ? y(this.end.y()) : y || this.end.y();
+
+    if (nx < 0) nx = 0;
+    else if (nx > this.pea.document.content[ny].length) nx = this.end.x();
+
+    if (ny < 0) ny = 0;
+    else if (ny > this.pea.document.content.length) ny = this.end.y();
+
+    this.start.set(nx, ny);
+    this.end.copy(this.start, true);
+  }
+
   updateFocusedSnippet(): void {
     // TODO: Make compatible with multiple snippets at once
-    [this.focusedSnippet] = this.pea.document.snippetAt(
-      this.end.x(),
-      this.end.y()
-    );
+    [this.focusedSnippet, this.focusedSnippetIndex] =
+      this.pea.document.snippetAt(this.end.x(), this.end.y());
   }
 
   rx = (): number => this.start.rx();

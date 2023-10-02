@@ -53,6 +53,10 @@ class Selection {
   ry = (): number => this.start.ry() - this.height * 0.85;
   rw = (): number => this.end.rx() - this.start.rx();
 
+  xSpan = (): number => this.end.x() - this.start.x();
+  ySpan = (): number => this.end.y() - this.start.y();
+  isCollapsed = (): boolean => this.xSpan() === 0 && this.ySpan() === 0;
+
   calculateEnd(length: number): Position {
     return new Position(this.pea, this.start.x() + length, 0); // TODO: CALCULATE END POSITION
   }

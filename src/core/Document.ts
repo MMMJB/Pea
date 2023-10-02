@@ -233,11 +233,58 @@ class Document {
   }
 
   newLine(selection?: Selection): void {
-    // TODO: selection || this.selection
+    const s = selection || this.selection;
+
+    if (s.isCollapsed()) {
+      const newLine = {
+        snippets: [{ text: "", formats: s.focusedSnippet.formats }],
+        length: 0,
+      };
+
+      this.content.push(newLine);
+
+      s.end.set(0, (n) => n + 1);
+      s.start.copy(s.end, true);
+    }
+
+    console.log(this.content);
   }
 
   removeText(selection?: Selection): void {
-    // TODO: selection || this.selection
+    const s = selection || this.selection;
+
+    if (s.isCollapsed()) {
+      const line = this.content[s.end.y()],
+        snippet = line.snippets[s.focusedSnippetIndex];
+
+      if (s.end.x() === 0) {
+        if (s.end.y() === 0) return;
+
+        const prevLine = this.content[s.end.y() - 1],
+          prevSnippet = prevLine.snippets[prevLine.snippets.length - 1];
+
+        prevSnippet.text += snippet.text;
+        prevLine.length += snippet.text.length;
+
+        line.snippets.splice(s.focusedSnippetIndex, 1);
+        line.length--;
+
+        s.end.set(
+          (n) => n - 1,
+          (n) => n - 1
+        );
+        s.start.copy(s.end, true);
+      } else {
+        snippet.text =
+          snippet.text.substring(0, s.end.x() - 1) +
+          snippet.text.substring(s.end.x());
+
+        line.length--;
+
+        s.end.set((n) => n - 1);
+        s.start.copy(s.end, true);
+      }
+    }
   }
 
   snippetAt(x: number, y: number): [Snippet, number] {

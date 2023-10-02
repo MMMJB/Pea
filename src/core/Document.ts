@@ -134,6 +134,7 @@ class Document {
   focus = (): void => {
     this.focused = true;
   };
+
   blur = (): void => {
     this.focused = false;
   };
@@ -262,8 +263,8 @@ class Document {
 
   measureLine(line: number, start?: number, end?: number): number {
     const l = this.content[line],
-      s = start !== undefined ? start : 0,
-      e = end !== undefined ? end : l.length - 1;
+      s = start ?? 0,
+      e = end ?? l.length - 1;
 
     const [ss, si] = this.snippetAt(s, line);
     const [es, ei] = this.snippetAt(e, line);
@@ -281,10 +282,7 @@ class Document {
       ss.text.substring(sl - s),
       ss.formats?.font as string
     );
-    t += this.measureText(
-      es.text.substring(el - e),
-      es.formats?.font as string
-    );
+    t += this.measureText(es.text.substring(0, e), es.formats?.font as string);
 
     for (let i = si + 1; i < ei; i++)
       t += this.measureText(
